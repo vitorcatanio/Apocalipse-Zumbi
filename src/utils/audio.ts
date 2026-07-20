@@ -221,3 +221,48 @@ export function playDecryptStatic(durationSec = 2) {
     }
   } catch (e) {}
 }
+
+export function playZombieGroan() {
+  if (!soundEnabled) return;
+  try {
+    const ctx = getAudioContext();
+    const now = ctx.currentTime;
+    
+    const osc = ctx.createOscillator();
+    const oscMod = ctx.createOscillator();
+    const modGain = ctx.createGain();
+    const gainNode = ctx.createGain();
+    
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(85, now);
+    osc.frequency.linearRampToValueAtTime(55, now + 1.2);
+    
+    oscMod.type = 'sine';
+    oscMod.frequency.setValueAtTime(22, now);
+    modGain.gain.setValueAtTime(15, now);
+    
+    oscMod.connect(modGain);
+    modGain.connect(osc.frequency);
+    
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.setValueAtTime(250, now);
+    filter.frequency.exponentialRampToValueAtTime(120, now + 1.2);
+    filter.Q.setValueAtTime(2, now);
+    
+    gainNode.gain.setValueAtTime(0, now);
+    gainNode.gain.linearRampToValueAtTime(0.04, now + 0.15);
+    gainNode.gain.linearRampToValueAtTime(0.03, now + 0.8);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+    
+    osc.connect(filter);
+    filter.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    
+    osc.start(now);
+    oscMod.start(now);
+    osc.stop(now + 1.2);
+    oscMod.stop(now + 1.2);
+  } catch (e) {}
+}
+

@@ -29,6 +29,7 @@ import {
   playTerminalAccess, 
   playWarningAlarm, 
   playDecryptStatic, 
+  playZombieGroan,
   toggleSound, 
   isSoundEnabled 
 } from './utils/audio';
@@ -179,6 +180,48 @@ export default function App() {
   const [decryptProgress, setDecryptProgress] = useState(0);
   const [decryptStep, setDecryptStep] = useState(0);
   const [showFinalWord, setShowFinalWord] = useState(false);
+
+  // Zombie Startup Animation states
+  const [showIntro, setShowIntro] = useState(true);
+  const [introStage, setIntroStage] = useState<'PROMPT' | 'ALERTA' | 'SCANNING' | 'STABILIZING'>('PROMPT');
+  const [introLogIndex, setIntroLogIndex] = useState(0);
+
+  // Triggering stages for zombie intro sequence
+  const handleStartIntro = () => {
+    setIntroStage('ALERTA');
+    playWarningAlarm(1.8);
+    playZombieGroan();
+    
+    // Switch to scanning phase after alert alarm is initialized
+    setTimeout(() => {
+      setIntroStage('SCANNING');
+    }, 1800);
+  };
+
+  useEffect(() => {
+    if (introStage !== 'SCANNING') return;
+
+    const logTimer = setInterval(() => {
+      setIntroLogIndex((prev) => {
+        if (prev >= 5) {
+          clearInterval(logTimer);
+          // Proceed to stabilizing
+          setTimeout(() => {
+            setIntroStage('STABILIZING');
+            playSuccessChime();
+            setTimeout(() => {
+              setShowIntro(false);
+            }, 1000);
+          }, 800);
+          return 5;
+        }
+        playTick();
+        return prev + 1;
+      });
+    }, 900);
+
+    return () => clearInterval(logTimer);
+  }, [introStage]);
 
   // Dynamic system time ticker
   useEffect(() => {
@@ -429,6 +472,157 @@ export default function App() {
 
   // Find selected class details
   const currentClassDetails = CHARACTER_CLASSES.find(c => c.id === selectedClass);
+
+  if (showIntro) {
+    return (
+      <div className="relative min-h-screen bg-black text-neon-green font-mono select-none overflow-hidden flex flex-col items-center justify-center p-4">
+        {/* Deep atmospheric scanlines & particles */}
+        <BackgroundOverlay />
+        
+        {/* Grid pattern */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(0,255,102,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,255,102,0.03)_1px,transparent_1px)] bg-[size:32px_32px]" />
+
+        <div className="absolute top-4 left-4 text-[10px] text-neon-green/40 font-mono tracking-widest uppercase select-none">
+          MAIN_BOOT_SEQUENCE // BETA-92
+        </div>
+        
+        <div className="absolute top-4 right-4 text-[10px] text-neon-red/60 font-mono tracking-widest uppercase select-none flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-neon-red animate-pulse" />
+          <span>STATUS: EM INFECÇÃO</span>
+        </div>
+
+        {/* Content Box */}
+        <div className="w-full max-w-xl p-6 sm:p-10 bg-black/80 border border-zinc-800 rounded-lg backdrop-blur-md relative overflow-hidden text-center shadow-[0_0_50px_rgba(239,68,68,0.05)] border-glow-red transition-all duration-500">
+          
+          {introStage === 'PROMPT' && (
+            <div className="space-y-8 py-6 animate-flicker">
+              <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center rounded-full bg-neon-red/10 border border-neon-red/30 text-neon-red relative animate-pulse shadow-[0_0_20px_rgba(239,68,68,0.1)]">
+                <Skull className="w-10 h-10 sm:w-12 sm:h-12" />
+                <div className="absolute -inset-1.5 rounded-full border border-neon-red/20 animate-ping" />
+              </div>
+              
+              <div className="space-y-3">
+                <h2 className="font-orbitron font-black text-2xl sm:text-3xl text-white tracking-widest uppercase glow-red">
+                  SINAL INTERCEPTADO
+                </h2>
+                <p className="text-zinc-400 text-xs sm:text-sm leading-relaxed max-w-md mx-auto">
+                  Nosso receptor captou transmissões de emergência de um bunker. Para iniciar a decodificação e sintonizar sua rádio de sobrevivência tática, estabeleça a conexão.
+                </p>
+              </div>
+
+              <div>
+                <button
+                  id="btn-conectar-bunker"
+                  onClick={handleStartIntro}
+                  className="px-8 py-4 bg-neon-red/10 border-2 border-neon-red hover:bg-neon-red hover:text-black text-neon-red font-orbitron font-bold text-sm tracking-widest rounded transition-all duration-300 shadow-[0_0_15px_rgba(239,68,68,0.15)] hover:shadow-[0_0_35px_rgba(239,68,68,0.5)] cursor-pointer uppercase animate-pulse"
+                >
+                  CONECTAR AO BUNKER
+                </button>
+              </div>
+            </div>
+          )}
+
+          {introStage === 'ALERTA' && (
+            <div className="space-y-8 py-10 flex flex-col items-center justify-center">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-neon-red flex items-center justify-center rounded-full text-black shadow-[0_0_40px_rgba(239,68,68,0.7)] animate-bounce">
+                <AlertTriangle className="w-10 h-10 sm:w-12 sm:h-12" />
+              </div>
+              <div className="space-y-3">
+                <p className="text-neon-red font-orbitron text-xl sm:text-2xl font-black tracking-widest animate-pulse">
+                  ⚠️ ALERTA DE INFECÇÃO CRÍTICA ⚠️
+                </p>
+                <p className="text-xs text-zinc-500 uppercase tracking-widest">
+                  Varredura biológica em andamento...
+                </p>
+              </div>
+              
+              {/* Progress bar simulation for alert warning */}
+              <div className="w-full max-w-xs h-1.5 bg-zinc-900 border border-zinc-800 rounded-full overflow-hidden">
+                <div className="h-full bg-neon-red animate-pulse" style={{ width: '100%' }} />
+              </div>
+            </div>
+          )}
+
+          {introStage === 'SCANNING' && (
+            <div className="space-y-6 text-left py-4">
+              <div className="flex items-center justify-between border-b border-zinc-800 pb-3 mb-2">
+                <span className="font-orbitron text-xs font-bold text-white tracking-widest uppercase flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-neon-green animate-ping" />
+                  SISTEMA DE SEGURANÇA OPERACIONAL
+                </span>
+                <span className="text-[10px] text-neon-green/60">ETAPA: {introLogIndex}/5</span>
+              </div>
+
+              {/* Dynamic typed style terminal printout */}
+              <div className="font-mono text-xs space-y-3 min-h-[160px] bg-black/40 p-4 rounded border border-zinc-900/60 leading-relaxed text-zinc-300">
+                {introLogIndex >= 0 && (
+                  <p className="text-neon-red flex gap-2">
+                    <span className="text-neon-red font-bold">&gt;</span>
+                    <span>[AVISO] INFECTADOS DETECTADOS NO PERÍMETRO DO REFÚGIO.</span>
+                  </p>
+                )}
+                {introLogIndex >= 1 && (
+                  <p className="flex gap-2 animate-pulse">
+                    <span className="text-neon-green font-bold">&gt;</span>
+                    <span>[LOG] Varredura de rádio iniciada nas frequências de emergência...</span>
+                  </p>
+                )}
+                {introLogIndex >= 2 && (
+                  <p className="flex gap-2">
+                    <span className="text-neon-green font-bold">&gt;</span>
+                    <span>[LOG] Conectando canais de comunicação com sobreviventes...</span>
+                  </p>
+                )}
+                {introLogIndex >= 3 && (
+                  <p className="flex gap-2 text-neon-green">
+                    <span className="font-bold">&gt;</span>
+                    <span>[SEGURANÇA] Bloqueio automático de portas reforçadas ativado com sucesso.</span>
+                  </p>
+                )}
+                {introLogIndex >= 4 && (
+                  <p className="flex gap-2">
+                    <span className="text-neon-green font-bold">&gt;</span>
+                    <span>[SISTEMA] Mainframe pronto. Sincronizando chaves de sobrevivência...</span>
+                  </p>
+                )}
+                {introLogIndex >= 5 && (
+                  <p className="text-white font-bold animate-pulse flex gap-2">
+                    <span className="text-neon-green font-bold">&gt;</span>
+                    <span>[STATUS] CONEXÃO ESTABILIZADA. SEJA BEM-VINDO AO ABRIGO!</span>
+                  </p>
+                )}
+              </div>
+
+              {/* Simulating scanning action line */}
+              <div className="w-full h-1 bg-zinc-900 border border-zinc-800 rounded relative overflow-hidden">
+                <div 
+                  className="h-full bg-neon-green shadow-[0_0_10px_#00ff66] transition-all duration-300"
+                  style={{ width: `${(introLogIndex / 5) * 100}%` }}
+                />
+              </div>
+            </div>
+          )}
+
+          {introStage === 'STABILIZING' && (
+            <div className="space-y-6 py-10 flex flex-col items-center justify-center text-center animate-pulse">
+              <div className="w-16 h-16 bg-neon-green/10 border border-neon-green text-neon-green flex items-center justify-center rounded-full shadow-[0_0_20px_rgba(0,255,102,0.2)]">
+                <Check className="w-8 h-8" />
+              </div>
+              <div className="space-y-2">
+                <p className="text-neon-green font-orbitron text-xl sm:text-2xl font-black tracking-widest uppercase">
+                  SISTEMA ESTABILIZADO
+                </p>
+                <p className="text-xs text-zinc-400 font-mono">
+                  ENTRANDO NO TERMINAL TÁTICO...
+                </p>
+              </div>
+            </div>
+          )}
+
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative min-h-screen bg-terminal-dark text-terminal-light font-sans select-none overflow-x-hidden flex flex-col justify-between">
