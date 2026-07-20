@@ -1,6 +1,6 @@
 {
   "name": "Apocalipse Zumbi",
-  "description": "Jogo de caça ao tesouro interativo e gamificado de sobrevivência no apocalipse zumbi para dinâmicas de equipe.",
+  "description": "Jogo de caça ao tesouro interativo e gamificado de sobrevivência no apocalipse zumbi para testar a sobrevivência da amizade verdadeira.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

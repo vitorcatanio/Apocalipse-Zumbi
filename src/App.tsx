@@ -214,9 +214,10 @@ export default function App() {
       return;
     }
     setNameError(false);
-    playTerminalAccess();
-    setSpecialModalState('PROMPT');
-    setShowSpecialModal(true);
+    playSuccessChime();
+    setIsLoadingMission(true);
+    setLoadingProgress(0);
+    setLoadingTextIndex(0);
   };
 
   // Rejecting the special mission modal
@@ -474,7 +475,7 @@ export default function App() {
       <main className="relative flex-grow flex items-center justify-center p-4 z-10 w-full max-w-7xl mx-auto">
         
         {/* ==================== TELA 1: HOME SCREEN ==================== */}
-        {screen === 'HOME' && (
+        {screen === 'HOME' && !isLoadingMission && (
           <div className="w-full max-w-2xl py-10 px-6 md:p-12 bg-black/60 border border-neon-green/20 rounded-lg text-center backdrop-blur-md relative overflow-hidden border-glow-green animate-flicker">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-neon-green to-transparent" />
             
@@ -521,7 +522,7 @@ export default function App() {
         )}
 
         {/* ==================== TELA 2: SURVIVOR PROFILE SETUP ==================== */}
-        {screen === 'SURVIVOR_SETUP' && (
+        {screen === 'SURVIVOR_SETUP' && !isLoadingMission && (
           <div className="w-full max-w-4xl bg-black/75 border border-neon-green/20 rounded-lg p-5 md:p-8 backdrop-blur-md border-glow-green">
             
             {/* Header label */}
@@ -645,25 +646,25 @@ export default function App() {
               {loadingTextIndex >= 0 && (
                 <p>
                   <span className="text-neon-green">&gt; </span>
-                  <Typewriter text="Inicializando protocolo de simulação militar..." speed={20} showCursor={false} playSound={soundActive} />
+                  <Typewriter text="Inicializando teste de sobrevivência da amizade verdadeira..." speed={20} showCursor={false} playSound={soundActive} />
                 </p>
               )}
               {loadingTextIndex >= 1 && (
                 <p>
                   <span className="text-neon-green">&gt; </span>
-                  <Typewriter text={`Verificando sobrevivente: ${name.toUpperCase()} [ID: #${selectedClass}]`} speed={20} showCursor={false} playSound={soundActive} />
+                  <Typewriter text={`Verificando sobrevivente amigo: ${name.toUpperCase()} [ID: #${selectedClass}]`} speed={20} showCursor={false} playSound={soundActive} />
                 </p>
               )}
               {loadingTextIndex >= 2 && (
                 <p>
                   <span className="text-neon-green">&gt; </span>
-                  <Typewriter text="Escaneando coeficiente de inteligência neural..." speed={20} showCursor={false} playSound={soundActive} />
+                  <Typewriter text="Analisando lealdade e empatia de convivência..." speed={20} showCursor={false} playSound={soundActive} />
                 </p>
               )}
               {loadingTextIndex >= 3 && (
                 <p>
                   <span className="text-neon-green">&gt; </span>
-                  <Typewriter text="Preparando missão tática de sobrevivência..." speed={20} showCursor={false} playSound={soundActive} />
+                  <Typewriter text="Sincronizando frequências de rádio do abrigo..." speed={20} showCursor={false} playSound={soundActive} />
                 </p>
               )}
               {loadingTextIndex >= 4 && (
@@ -877,12 +878,12 @@ export default function App() {
                 <div className="max-w-xl mx-auto p-4 bg-neon-red/5 border border-neon-red/20 rounded text-left space-y-2.5 font-mono text-xs text-zinc-300">
                   <div className="flex items-center gap-2 text-neon-red font-bold">
                     <ShieldAlert className="w-4 h-4 animate-pulse" />
-                    <span>⚠ INFORMAÇÃO EXTREMAMENTE CONFIDENCIAL</span>
+                    <span>⚠ PROTOCOLO DE CONFIANÇA MÚTUA</span>
                   </div>
                   <p className="leading-relaxed">
-                    A palavra acima representa uma fração cifrada do arquivo de evacuação do refúgio. 
-                    <span className="text-white font-bold"> Não divulgue sua palavra diretamente</span> para preservar a segurança militar. 
-                    Talvez seja necessário unir forças e cooperar com outros sobreviventes para compreender seu significado total.
+                    A palavra secreta acima representa uma fração cifrada do arquivo de fuga. 
+                    <span className="text-white font-bold"> Não revele sua palavra levianamente</span> para preservar o teste de lealdade. 
+                    A verdadeira sobrevivência depende da confiança. Una forças, coopere com seus amigos de verdade e combinem suas respectivas chaves de identificação para juntos revelarem a verdade completa!
                   </p>
                 </div>
 
@@ -919,17 +920,17 @@ export default function App() {
               </div>
 
               <h3 className="font-orbitron font-black text-lg text-neon-yellow tracking-wider mb-2">
-                ⚠ MISSÃO ESPECIAL DETECTADA
+                ⚠ PROTOCOLO AMIZADE VERDADEIRA
               </h3>
               
               <div className="space-y-4 text-xs text-zinc-300 leading-relaxed text-left my-4">
                 <p className="text-white font-bold border-b border-zinc-800 pb-1.5 mb-1.5">Antes de iniciarmos...</p>
                 <p>
-                  Precisamos desvendar um mistério e analisar se você possui as coordenadas lógicas para sobreviver.
-                  Nosso radar militar detectou quatro anomalias de rádio eletrônicas no abrigo.
+                  Este é um teste tático especial projetado para avaliar se o elo de amizade de vocês consegue sobreviver às pressões extremas do apocalipse.
+                  Nossa varredura de emergência detectou quatro transmissões ocultas de rádio eletrônicas no abrigo.
                 </p>
                 <p className="text-neon-green font-bold">
-                  Você aceita o desafio de caça ao tesouro hacker para comprovar sua inteligência?
+                  Você aceita o desafio de caça ao tesouro para comprovar a força, lealdade e sobrevivência da sua amizade verdadeira?
                 </p>
               </div>
 
@@ -1173,7 +1174,7 @@ export default function App() {
           SYS_OPERATIONAL_MATRIX v2.40 // EXCLUSIVE INTEL
         </div>
         <div className="flex items-center gap-4 text-zinc-500">
-          <span>ALVO: DINÂMICA PRESENCIAL DE EMPRESA</span>
+          <span>ALVO: SOBREVIVÊNCIA DA AMIZADE VERDADEIRA</span>
           <span>●</span>
           <span>APOCALIPSE ZUMBI © 2026</span>
         </div>
